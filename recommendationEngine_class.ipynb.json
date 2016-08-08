@@ -11,7 +11,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 129,
+   "execution_count": 7,
    "metadata": {
     "collapsed": false
    },
@@ -54,8 +54,8 @@
     "        #rawRatings_header = rawRatings.take(1)[0]  ## no need if there are no headers.\n",
     "        #self.parsedRatings = rawRatings.filter(lambda x: x!=rawRatings_header)\\\n",
     "        \n",
-    "        #self.ratings_RDD =rawRatings.map(lambda line: line.split(\"::\")).map(lambda x: Rating(int(x[0]),int(x[1]),float(x[2]))).cache()\n",
-    "        self.ratings_RDD =rawRatings.map(lambda line: line.split(\"\\t\")).map(lambda x: Rating(int(x[0]),int(x[1]),float(x[2]))).cache()\n",
+    "        self.ratings_RDD =rawRatings.map(lambda line: line.split(\"::\")).map(lambda x: Rating(int(x[0]),int(x[1]),float(x[2]))).cache()\n",
+    "        #self.ratings_RDD =rawRatings.map(lambda line: line.split(\"\\t\")).map(lambda x: Rating(int(x[0]),int(x[1]),float(x[2]))).cache()\n",
     "            \n",
     "         \n",
     "        ''' Load movies data for later use '''\n",
@@ -63,8 +63,8 @@
     "        #rawMovies_header = rawMovies.take(1)[0]\n",
     "        #self.paredMovies_RDD = rawMovies.filter(lambda x: x!=rawMovies_header)\\\n",
     "        \n",
-    "        #self.movies_RDD = rawMovies.map(lambda line: line.split(\"::\")).map(lambda x: (int(x[0]),x[1])).cache()\n",
-    "        self.movies_RDD = rawMovies.map(lambda line: line.split(\"|\")).map(lambda x: (int(x[0]),x[1])).cache()\n",
+    "        self.movies_RDD = rawMovies.map(lambda line: line.split(\"::\")).map(lambda x: (int(x[0]),x[1])).cache()\n",
+    "        #self.movies_RDD = rawMovies.map(lambda line: line.split(\"|\")).map(lambda x: (int(x[0]),x[1])).cache()\n",
     "        print self.ratings_RDD.take(2)\n",
     "        print self.movies_RDD.take(2)\n",
     "             \n",
@@ -105,8 +105,8 @@
     "           http://spark.apache.org/docs/latest/api/python/pyspark.mllib.html#pyspark.mllib.recommendation.ALS\n",
     "        \"\"\"\n",
     "        print self.rank, self.seed, self.iterations, self.regularization_parameter\n",
-    "        #self.model = ALS.train(self.trainData, rank = rank, seed = seed,\n",
-    "        #                       iterations=iterations, lambda_=regularization_parameter)\n",
+    "        #self.model = ALS.train(self.trainData, rank = self.rank, seed = self.seed,\n",
+    "        #                       iterations=self.iterations, lambda_= self.regularization_parameter)\n",
     "        self.model_grid_search()\n",
     "        \n",
     "        \n",
@@ -124,7 +124,7 @@
     "        X_val = self.valData.map(lambda x: (x[0], x[1]))\n",
     "        for rank in ranks:\n",
     "            for reg in [1e-3, 0.01, 0.03, 0.06, 0.1, 0.15, 0.2, 1.0]:\n",
-    "                model = ALS.train(self.trainData, rank, seed=seed, iterations=iterations, lambda_=reg)\n",
+    "                model = ALS.train(self.trainData, rank, seed=self.seed, iterations=self.iterations, lambda_=reg)\n",
     "                predictions = model.predictAll(X_val).map(lambda r: ((r[0], r[1]), r[2]))\n",
     "                rates_and_preds = self.valData.map(lambda r: ((int(r[0]), int(r[1])), float(r[2]))).join(predictions)\n",
     "                error = math.sqrt(rates_and_preds.map(lambda r: (r[1][0] - r[1][1])**2).mean())\n",
@@ -228,7 +228,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 112,
+   "execution_count": 8,
    "metadata": {
     "collapsed": false
    },
@@ -240,6 +240,32 @@
       "[Rating(user=1, product=1193, rating=5.0), Rating(user=1, product=661, rating=3.0)]\n",
       "[(1, u'Toy Story (1995)'), (2, u'Jumanji (1995)')]\n",
       "8 42 6 0.06\n",
+      "For rank 4, reg 0.001, the RMSE is 0.922987744342\n",
+      "For rank 4, reg 0.01, the RMSE is 0.895466287827\n",
+      "For rank 4, reg 0.03, the RMSE is 0.887010542566\n",
+      "For rank 4, reg 0.06, the RMSE is 0.883851963524\n",
+      "For rank 4, reg 0.1, the RMSE is 0.88669284454\n",
+      "For rank 4, reg 0.15, the RMSE is 0.89688534893\n",
+      "For rank 4, reg 0.2, the RMSE is 0.911706442458\n",
+      "For rank 4, reg 1.0, the RMSE is 1.35149487788\n",
+      "For rank 8, reg 0.001, the RMSE is 0.975113517888\n",
+      "For rank 8, reg 0.01, the RMSE is 0.916084211348\n",
+      "For rank 8, reg 0.03, the RMSE is 0.888832865595\n",
+      "For rank 8, reg 0.06, the RMSE is 0.877317619184\n",
+      "For rank 8, reg 0.1, the RMSE is 0.880366475884\n",
+      "For rank 8, reg 0.15, the RMSE is 0.896353898071\n",
+      "For rank 8, reg 0.2, the RMSE is 0.913529607823\n",
+      "For rank 8, reg 1.0, the RMSE is 1.35157030746\n",
+      "For rank 12, reg 0.001, the RMSE is 1.07823264395\n",
+      "For rank 12, reg 0.01, the RMSE is 0.95056753537\n",
+      "For rank 12, reg 0.03, the RMSE is 0.902752662134\n",
+      "For rank 12, reg 0.06, the RMSE is 0.883016370739\n",
+      "For rank 12, reg 0.1, the RMSE is 0.889136267523\n",
+      "For rank 12, reg 0.15, the RMSE is 0.91306636002\n",
+      "For rank 12, reg 0.2, the RMSE is 0.934187202406\n",
+      "For rank 12, reg 1.0, the RMSE is 1.35234444146\n",
+      "The best model was trained with rank 8 and reg 0.06\n",
+      "min error is  0.877317619184\n",
       "model is done\n"
      ]
     }
@@ -256,7 +282,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 113,
+   "execution_count": 9,
    "metadata": {
     "collapsed": false
    },
@@ -265,7 +291,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "the RMSE for the model is 0.880036705074\n"
+      "the RMSE for the model is 0.879790106735\n"
      ]
     }
    ],
@@ -297,6 +323,15 @@
     "predictions = engine.get_predict_ratings(user_and_movie)\n",
     "print predictions.take(3)"
    ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
   },
   {
    "cell_type": "markdown",
@@ -608,7 +643,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 130,
+   "execution_count": 2,
    "metadata": {
     "collapsed": false
    },
@@ -620,32 +655,32 @@
       "[Rating(user=196, product=242, rating=3.0), Rating(user=186, product=302, rating=3.0)]\n",
       "[(1, u'Toy Story (1995)'), (2, u'GoldenEye (1995)')]\n",
       "8 42 6 0.06\n",
-      "For rank 4, reg 0.001, the RMSE is 1.10245333177\n",
-      "For rank 4, reg 0.01, the RMSE is 1.03125462288\n",
-      "For rank 4, reg 0.03, the RMSE is 0.993527510602\n",
-      "For rank 4, reg 0.06, the RMSE is 0.967559242311\n",
-      "For rank 4, reg 0.1, the RMSE is 0.952788514199\n",
-      "For rank 4, reg 0.15, the RMSE is 0.949520700304\n",
-      "For rank 4, reg 0.2, the RMSE is 0.957018442549\n",
-      "For rank 4, reg 1.0, the RMSE is 1.38083928519\n",
-      "For rank 8, reg 0.001, the RMSE is 1.37755308923\n",
-      "For rank 8, reg 0.01, the RMSE is 1.13588625338\n",
-      "For rank 8, reg 0.03, the RMSE is 1.04015802071\n",
-      "For rank 8, reg 0.06, the RMSE is 0.987992434853\n",
-      "For rank 8, reg 0.1, the RMSE is 0.960079713626\n",
-      "For rank 8, reg 0.15, the RMSE is 0.953724194961\n",
-      "For rank 8, reg 0.2, the RMSE is 0.961780536239\n",
-      "For rank 8, reg 1.0, the RMSE is 1.38086012637\n",
-      "For rank 12, reg 0.001, the RMSE is 1.48069730288\n",
-      "For rank 12, reg 0.01, the RMSE is 1.17596971905\n",
-      "For rank 12, reg 0.03, the RMSE is 1.06168982074\n",
-      "For rank 12, reg 0.06, the RMSE is 0.994875547822\n",
-      "For rank 12, reg 0.1, the RMSE is 0.962349958547\n",
-      "For rank 12, reg 0.15, the RMSE is 0.954114039094\n",
-      "For rank 12, reg 0.2, the RMSE is 0.961671903406\n",
-      "For rank 12, reg 1.0, the RMSE is 1.38089294147\n",
-      "The best model was trained with rank 4 and reg 0.15\n",
-      "min error is  0.949520700304\n",
+      "For rank 4, reg 0.001, the RMSE is 1.11801578448\n",
+      "For rank 4, reg 0.01, the RMSE is 1.02726783982\n",
+      "For rank 4, reg 0.03, the RMSE is 0.988689096927\n",
+      "For rank 4, reg 0.06, the RMSE is 0.959936904874\n",
+      "For rank 4, reg 0.1, the RMSE is 0.947575079548\n",
+      "For rank 4, reg 0.15, the RMSE is 0.947851716712\n",
+      "For rank 4, reg 0.2, the RMSE is 0.956440227836\n",
+      "For rank 4, reg 1.0, the RMSE is 1.38091279695\n",
+      "For rank 8, reg 0.001, the RMSE is 1.3401866124\n",
+      "For rank 8, reg 0.01, the RMSE is 1.11944012977\n",
+      "For rank 8, reg 0.03, the RMSE is 1.03021556546\n",
+      "For rank 8, reg 0.06, the RMSE is 0.980759802157\n",
+      "For rank 8, reg 0.1, the RMSE is 0.955833042749\n",
+      "For rank 8, reg 0.15, the RMSE is 0.950613839413\n",
+      "For rank 8, reg 0.2, the RMSE is 0.95912901433\n",
+      "For rank 8, reg 1.0, the RMSE is 1.38091978011\n",
+      "For rank 12, reg 0.001, the RMSE is 1.52374275132\n",
+      "For rank 12, reg 0.01, the RMSE is 1.17646538857\n",
+      "For rank 12, reg 0.03, the RMSE is 1.05970736558\n",
+      "For rank 12, reg 0.06, the RMSE is 0.992067927259\n",
+      "For rank 12, reg 0.1, the RMSE is 0.957958914639\n",
+      "For rank 12, reg 0.15, the RMSE is 0.949316091879\n",
+      "For rank 12, reg 0.2, the RMSE is 0.956572458365\n",
+      "For rank 12, reg 1.0, the RMSE is 1.38097064053\n",
+      "The best model was trained with rank 4 and reg 0.1\n",
+      "min error is  0.947575079548\n",
       "model is done\n"
      ]
     }
@@ -662,7 +697,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 132,
+   "execution_count": 4,
    "metadata": {
     "collapsed": false
    },
@@ -671,7 +706,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "the RMSE for the model is 0.937493481382\n"
+      "the RMSE for the model is 0.94104599962\n"
      ]
     }
    ],
@@ -920,7 +955,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 49,
+   "execution_count": 10,
    "metadata": {
     "collapsed": true
    },
@@ -942,7 +977,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 50,
+   "execution_count": 11,
    "metadata": {
     "collapsed": false
    },
@@ -951,25 +986,33 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "8613.0 <type 'float'>\n",
-      "1 <type 'int'>\n",
-      "8 42 6 0.1\n",
-      "For rank 4, reg 0.001, the RMSE is 0.905729691252\n",
-      "For rank 4, reg 0.01, the RMSE is 0.888380007595\n",
-      "For rank 4, reg 0.1, the RMSE is 0.883619254114\n",
-      "For rank 4, reg 0.2, the RMSE is 0.90901555442\n",
-      "For rank 4, reg 1.0, the RMSE is 1.35196201519\n",
-      "For rank 8, reg 0.001, the RMSE is 0.979621682023\n",
-      "For rank 8, reg 0.01, the RMSE is 0.914595534226\n",
-      "For rank 8, reg 0.1, the RMSE is 0.887003154313\n",
-      "For rank 8, reg 0.2, the RMSE is 0.923973490051\n",
-      "For rank 8, reg 1.0, the RMSE is 1.35261830852\n",
-      "For rank 12, reg 0.001, the RMSE is 1.07660253627\n",
-      "For rank 12, reg 0.01, the RMSE is 0.943594920098\n",
-      "For rank 12, reg 0.1, the RMSE is 0.886094065569\n",
-      "For rank 12, reg 0.2, the RMSE is 0.926246486807\n",
-      "For rank 12, reg 1.0, the RMSE is 1.35260755867\n",
-      "The best model was trained with rank 4 and reg 0.1\n",
+      "8 42 6 0.06\n",
+      "For rank 4, reg 0.001, the RMSE is 0.904163396926\n",
+      "For rank 4, reg 0.01, the RMSE is 0.888543319507\n",
+      "For rank 4, reg 0.03, the RMSE is 0.882919134443\n",
+      "For rank 4, reg 0.06, the RMSE is 0.880583352363\n",
+      "For rank 4, reg 0.1, the RMSE is 0.883409649717\n",
+      "For rank 4, reg 0.15, the RMSE is 0.893538980472\n",
+      "For rank 4, reg 0.2, the RMSE is 0.908244980544\n",
+      "For rank 4, reg 1.0, the RMSE is 1.35152666631\n",
+      "For rank 8, reg 0.001, the RMSE is 0.983675007946\n",
+      "For rank 8, reg 0.01, the RMSE is 0.915240361196\n",
+      "For rank 8, reg 0.03, the RMSE is 0.889541114291\n",
+      "For rank 8, reg 0.06, the RMSE is 0.881373993055\n",
+      "For rank 8, reg 0.1, the RMSE is 0.88776764348\n",
+      "For rank 8, reg 0.15, the RMSE is 0.905968770826\n",
+      "For rank 8, reg 0.2, the RMSE is 0.92433251938\n",
+      "For rank 8, reg 1.0, the RMSE is 1.35225410714\n",
+      "For rank 12, reg 0.001, the RMSE is 1.06518487852\n",
+      "For rank 12, reg 0.01, the RMSE is 0.945138960457\n",
+      "For rank 12, reg 0.03, the RMSE is 0.899947183589\n",
+      "For rank 12, reg 0.06, the RMSE is 0.881755523356\n",
+      "For rank 12, reg 0.1, the RMSE is 0.886391933041\n",
+      "For rank 12, reg 0.15, the RMSE is 0.907391732862\n",
+      "For rank 12, reg 0.2, the RMSE is 0.926361001086\n",
+      "For rank 12, reg 1.0, the RMSE is 1.35224674714\n",
+      "The best model was trained with rank 4 and reg 0.06\n",
+      "min error is  0.880583352363\n",
       "new model training is done\n"
      ]
     }
@@ -981,7 +1024,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 51,
+   "execution_count": 12,
    "metadata": {
     "collapsed": false
    },
@@ -990,7 +1033,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "the RMSE for the model is 0.883609517835\n"
+      "the RMSE for the model is 0.880572076121\n"
      ]
     }
    ],
